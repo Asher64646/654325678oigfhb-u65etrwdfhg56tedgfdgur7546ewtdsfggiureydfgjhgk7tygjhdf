@@ -1,24 +1,21 @@
-import type { Metadata } from "next";
+import "./globals.css";
+import type { ReactNode } from "react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Asher AI",
-  description: "Asher AI – AI-powered website builder",
+  description: "AI Website Builder powered by Asher",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
         style={{
           margin: 0,
-          padding: 0,
-          background: "black",
-          color: "white",
-          fontFamily: "system-ui, sans-serif",
+          minHeight: "100vh",
+          background: "radial-gradient(circle at top, #2a003d, #000)",
+          color: "#fff",
+          fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
         {children}
