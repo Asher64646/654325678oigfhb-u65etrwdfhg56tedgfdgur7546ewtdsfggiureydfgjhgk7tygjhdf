@@ -11,7 +11,7 @@ export default function Page() {
 
   const [manifest, setManifest] = useState(null);
   const [selected, setSelected] = useState(0);
-  const [edits, setEdits] = useState({}); // { [path]: { html } }
+  const [edits, setEdits] = useState({});
 
   const pages = manifest?.pages || [];
   const currentPage = pages[selected];
@@ -22,17 +22,10 @@ export default function Page() {
   }, [currentPage, edits]);
 
   // ================================
-  // GENERATE SITE (PHASE 4 INCLUDED)
+  // GENERATE SITE (NO PHASE 4 LIMIT)
   // ================================
   async function generate(e) {
     e.preventDefault();
-
-    // 🔒 PHASE 4 — FREE PLAN LIMIT
-    if (brief.trim().length > 500) {
-      setErr("Upgrade required: free plan allows up to 500 characters.");
-      return;
-    }
-
     setErr("");
     setLoading(true);
     setManifest(null);
@@ -67,7 +60,7 @@ export default function Page() {
 
     const zip = new JSZip();
 
-    (manifest.pages || []).forEach((p) => {
+    manifest.pages.forEach((p) => {
       const name = p.path === "/" ? "index.html" : p.path.replace("/", "") + ".html";
       const html = edits[p.path]?.html ?? p.html;
       zip.file(name, html);
@@ -116,7 +109,7 @@ Home page is index.html
             </div>
           </div>
 
-          <div className="row" style={{ alignItems: "center" }}>
+          <div className="row">
             <button className="btn" onClick={() => setShowPreview((v) => !v)}>
               {showPreview ? "Hide Preview" : "Show Preview"}
             </button>
@@ -128,7 +121,7 @@ Home page is index.html
       </div>
 
       <div style={{ maxWidth: 1100, margin: "16px auto 0" }} className="grid grid3">
-        {/* LEFT PANEL */}
+        {/* LEFT */}
         <div className="card" style={{ padding: 16 }}>
           <form onSubmit={generate} className="grid" style={{ gap: 12 }}>
             <div>
@@ -142,9 +135,6 @@ Home page is index.html
                 onChange={(e) => setBrief(e.target.value)}
                 placeholder='Example: "A modern agency site with services, pricing, testimonials, contact form. Black/purple galaxy vibe."'
               />
-              <div className="small" style={{ marginTop: 8 }}>
-                Free plan: up to 500 characters
-              </div>
             </div>
 
             <div className="row">
@@ -171,37 +161,19 @@ Home page is index.html
             </div>
 
             <div className="row">
-              <button
-                className="btn"
-                type="button"
-                onClick={() =>
-                  setPreset(
-                    "A sleek agency portfolio with services, case studies, pricing, testimonials, contact. Galaxy black/purple theme."
-                  )
-                }
-              >
+              <button className="btn" type="button" onClick={() => setPreset(
+                "A sleek agency portfolio with services, case studies, pricing, testimonials, contact. Galaxy black/purple theme."
+              )}>
                 Agency
               </button>
-              <button
-                className="btn"
-                type="button"
-                onClick={() =>
-                  setPreset(
-                    "A personal portfolio with hero, projects, about, skills, contact. Dark premium style."
-                  )
-                }
-              >
+              <button className="btn" type="button" onClick={() => setPreset(
+                "A personal portfolio with hero, projects, about, skills, contact. Dark premium style."
+              )}>
                 Portfolio
               </button>
-              <button
-                className="btn"
-                type="button"
-                onClick={() =>
-                  setPreset(
-                    "A SaaS landing page with features, pricing, FAQs, testimonials, and a strong CTA. Purple/black modern."
-                  )
-                }
-              >
+              <button className="btn" type="button" onClick={() => setPreset(
+                "A SaaS landing page with features, pricing, FAQs, testimonials, and a strong CTA. Purple/black modern."
+              )}>
                 SaaS
               </button>
             </div>
@@ -212,9 +184,6 @@ Home page is index.html
           <hr className="hr" />
 
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Editor</div>
-          <div className="small" style={{ marginBottom: 10 }}>
-            Select a page tab, then edit its HTML.
-          </div>
 
           <div className="tabs" style={{ marginBottom: 10 }}>
             {pages.map((p, i) => (
@@ -245,24 +214,13 @@ Home page is index.html
           )}
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT */}
         {showPreview && (
           <div className="card" style={{ padding: 16 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}>
-              <div>
-                <div style={{ fontWeight: 800 }}>Live Preview</div>
-                <div className="small">Inspect generated HTML in dev tools</div>
-              </div>
-            </div>
-
-            <hr className="hr" />
-
             {!manifest ? (
               <div className="small">No site yet.</div>
             ) : (
-              <div className="iframeWrap">
-                <iframe className="iframe" title="preview" srcDoc={currentHtml} />
-              </div>
+              <iframe className="iframe" title="preview" srcDoc={currentHtml} />
             )}
           </div>
         )}
