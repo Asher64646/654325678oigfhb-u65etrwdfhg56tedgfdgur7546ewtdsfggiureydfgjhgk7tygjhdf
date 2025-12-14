@@ -1,3 +1,13 @@
+useEffect(() => {
+  const saved = localStorage.getItem("asher-project");
+  if (saved) setManifest(JSON.parse(saved));
+}, []);
+
+useEffect(() => {
+  if (manifest) {
+    localStorage.setItem("asher-project", JSON.stringify(manifest));
+  }
+}, [manifest]);
 "use client";
 
 import { useMemo, useState } from "react";
