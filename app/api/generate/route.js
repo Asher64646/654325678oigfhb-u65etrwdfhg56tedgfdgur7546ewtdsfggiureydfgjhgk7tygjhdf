@@ -4,49 +4,47 @@ export async function POST(req) {
   try {
     const { brief } = await req.json();
 
-    if (!brief || !brief.trim()) {
-      return NextResponse.json(
-        { error: "Brief is required" },
-        { status: 400 }
-      );
+    if (!brief) {
+      return NextResponse.json({ error: "Brief required" }, { status: 400 });
     }
 
-    // TEMP: deterministic output (safe, no OpenAI yet)
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert web designer. Generate clean HTML pages.",
+          },
+          {
+            role: "user",
+            content: `Create a full homepage HTML for this website:\n${brief}`,
+          },
+        ],
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await res.json();
+    const html = data.choices?.[0]?.message?.content || "<h1>Error</h1>";
+
     return NextResponse.json({
-      title: "Asher AI Generated Site",
+      title: "Asher AI Site",
       pages: [
         {
           path: "/",
           title: "Home",
-          html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Home</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0b0616;
-      color: #e9d5ff;
-      padding: 40px;
-    }
-    h1 { color: #c084fc; }
-  </style>
-</head>
-<body>
-  <h1>Welcome</h1>
-  <p>${brief}</p>
-</body>
-</html>
-          `,
+          html,
         },
       ],
     });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Generation failed" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return NextResponse.json({ error: "AI failed" }, { status: 500 });
   }
 }
