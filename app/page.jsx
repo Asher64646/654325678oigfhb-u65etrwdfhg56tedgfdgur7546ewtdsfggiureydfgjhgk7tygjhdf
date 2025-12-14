@@ -1,13 +1,3 @@
-useEffect(() => {
-  const saved = localStorage.getItem("asher-project");
-  if (saved) setManifest(JSON.parse(saved));
-}, []);
-
-useEffect(() => {
-  if (manifest) {
-    localStorage.setItem("asher-project", JSON.stringify(manifest));
-  }
-}, [manifest]);
 "use client";
 
 import { useMemo, useState } from "react";
@@ -31,8 +21,18 @@ export default function Page() {
     return edits[currentPage.path]?.html ?? currentPage.html;
   }, [currentPage, edits]);
 
+  // ================================
+  // GENERATE SITE (PHASE 4 INCLUDED)
+  // ================================
   async function generate(e) {
     e.preventDefault();
+
+    // 🔒 PHASE 4 — FREE PLAN LIMIT
+    if (brief.trim().length > 500) {
+      setErr("Upgrade required: free plan allows up to 500 characters.");
+      return;
+    }
+
     setErr("");
     setLoading(true);
     setManifest(null);
@@ -47,6 +47,7 @@ export default function Page() {
       });
 
       if (!res.ok) throw new Error(`Server error ${res.status}`);
+
       const data = await res.json();
       setManifest(data);
       setSelected(0);
@@ -58,8 +59,12 @@ export default function Page() {
     }
   }
 
+  // ================================
+  // EXPORT ZIP
+  // ================================
   async function exportZip() {
     if (!manifest) return;
+
     const zip = new JSZip();
 
     (manifest.pages || []).forEach((p) => {
@@ -70,7 +75,11 @@ export default function Page() {
 
     zip.file(
       "README.txt",
-      `Asher AI export\n\nUpload these HTML files to any static host.\nHome is index.html\n`
+      `Asher AI export
+
+Upload these HTML files to any static host.
+Home page is index.html
+`
     );
 
     const blob = await zip.generateAsync({ type: "blob" });
@@ -86,6 +95,9 @@ export default function Page() {
     setBrief(text);
   }
 
+  // ================================
+  // UI
+  // ================================
   return (
     <div className="asher-bg">
       <div className="card" style={{ maxWidth: 1100, margin: "0 auto", padding: 16 }}>
@@ -98,7 +110,9 @@ export default function Page() {
             />
             <div>
               <div className="h1">Asher AI</div>
-              <div className="sub">Describe your website — Asher generates a professional multi-page site.</div>
+              <div className="sub">
+                Describe your website — Asher generates a professional multi-page site.
+              </div>
             </div>
           </div>
 
@@ -113,12 +127,14 @@ export default function Page() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "16px auto 0" }} className={`grid grid3`}>
-        {/* LEFT: Builder / Editor */}
+      <div style={{ maxWidth: 1100, margin: "16px auto 0" }} className="grid grid3">
+        {/* LEFT PANEL */}
         <div className="card" style={{ padding: 16 }}>
           <form onSubmit={generate} className="grid" style={{ gap: 12 }}>
             <div>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Describe your website</div>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                Describe your website
+              </div>
               <textarea
                 className="textarea"
                 rows={showPreview ? 10 : 16}
@@ -127,12 +143,16 @@ export default function Page() {
                 placeholder='Example: "A modern agency site with services, pricing, testimonials, contact form. Black/purple galaxy vibe."'
               />
               <div className="small" style={{ marginTop: 8 }}>
-                Tip: try presets to see multi-page output fast.
+                Free plan: up to 500 characters
               </div>
             </div>
 
             <div className="row">
-              <button className="btn btnPrimary" disabled={loading || !brief.trim()} type="submit">
+              <button
+                className="btn btnPrimary"
+                disabled={loading || !brief.trim()}
+                type="submit"
+              >
                 {loading ? "Generating…" : "Generate site"}
               </button>
               <button
@@ -151,29 +171,53 @@ export default function Page() {
             </div>
 
             <div className="row">
-              <button className="btn" type="button" onClick={() => setPreset("A sleek agency portfolio with services, case studies, pricing, testimonials, contact. Galaxy black/purple theme.")}>
+              <button
+                className="btn"
+                type="button"
+                onClick={() =>
+                  setPreset(
+                    "A sleek agency portfolio with services, case studies, pricing, testimonials, contact. Galaxy black/purple theme."
+                  )
+                }
+              >
                 Agency
               </button>
-              <button className="btn" type="button" onClick={() => setPreset("A personal portfolio with hero, projects, about, skills, contact. Dark premium style.")}>
+              <button
+                className="btn"
+                type="button"
+                onClick={() =>
+                  setPreset(
+                    "A personal portfolio with hero, projects, about, skills, contact. Dark premium style."
+                  )
+                }
+              >
                 Portfolio
               </button>
-              <button className="btn" type="button" onClick={() => setPreset("A SaaS landing page with features, pricing, FAQs, testimonials, and a strong CTA. Purple/black modern.")}>
+              <button
+                className="btn"
+                type="button"
+                onClick={() =>
+                  setPreset(
+                    "A SaaS landing page with features, pricing, FAQs, testimonials, and a strong CTA. Purple/black modern."
+                  )
+                }
+              >
                 SaaS
               </button>
             </div>
 
-            {err ? <div style={{ color: "#ff6b6b" }}>{err}</div> : null}
+            {err && <div style={{ color: "#ff6b6b" }}>{err}</div>}
           </form>
 
           <hr className="hr" />
 
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Editor</div>
           <div className="small" style={{ marginBottom: 10 }}>
-            Select a page tab, then edit its HTML. Preview updates instantly.
+            Select a page tab, then edit its HTML.
           </div>
 
           <div className="tabs" style={{ marginBottom: 10 }}>
-            {(pages || []).map((p, i) => (
+            {pages.map((p, i) => (
               <div
                 key={p.path}
                 className={`tab ${i === selected ? "tabActive" : ""}`}
@@ -185,12 +229,12 @@ export default function Page() {
           </div>
 
           {!manifest ? (
-            <div className="small">Generate a site to unlock the editor + preview.</div>
+            <div className="small">Generate a site to unlock editor + preview.</div>
           ) : (
             <textarea
               className="textarea"
               rows={showPreview ? 12 : 22}
-              value={currentPage ? (edits[currentPage.path]?.html ?? currentPage.html) : ""}
+              value={currentPage ? edits[currentPage.path]?.html ?? currentPage.html : ""}
               onChange={(e) => {
                 const next = e.target.value;
                 const path = currentPage?.path;
@@ -201,36 +245,31 @@ export default function Page() {
           )}
         </div>
 
-        {/* RIGHT: Preview */}
-        {showPreview ? (
+        {/* RIGHT PANEL */}
+        {showPreview && (
           <div className="card" style={{ padding: 16 }}>
-            <div className="row" style={{ alignItems: "center", justifyContent: "space-between" }}>
+            <div className="row" style={{ justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontWeight: 800 }}>Live Preview</div>
-                <div className="small">
-                  Tip: open dev tools if you want to inspect the generated HTML.
-                </div>
-              </div>
-              <div className="small">
-                Shortcut: <span className="kbd">Ctrl</span> + <span className="kbd">F5</span> refresh
+                <div className="small">Inspect generated HTML in dev tools</div>
               </div>
             </div>
 
             <hr className="hr" />
 
             {!manifest ? (
-              <div className="small">No site yet. Click “Generate site”.</div>
+              <div className="small">No site yet.</div>
             ) : (
               <div className="iframeWrap">
                 <iframe className="iframe" title="preview" srcDoc={currentHtml} />
               </div>
             )}
           </div>
-        ) : null}
+        )}
       </div>
 
       <div style={{ maxWidth: 1100, margin: "14px auto 0" }} className="small">
-        Brand: Asher AI · Assistant: Asher · Export ZIP creates static HTML files.
+        Brand: Asher AI · Assistant: Asher · Export ZIP creates static HTML files
       </div>
     </div>
   );
