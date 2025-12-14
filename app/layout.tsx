@@ -1,21 +1,24 @@
-import "./globals.css";
 import type { ReactNode } from "react";
 
 export const metadata = {
   title: "Asher AI",
-  description: "AI Website Builder powered by Asher",
+  description: "AI-powered website builder",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <html lang="en">
       <body
         style={{
           margin: 0,
-          minHeight: "100vh",
-          background: "radial-gradient(circle at top, #2a003d, #000)",
+          padding: 0,
+          backgroundColor: "#000",
           color: "#fff",
-          fontFamily: "Inter, system-ui, sans-serif",
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
         {children}
