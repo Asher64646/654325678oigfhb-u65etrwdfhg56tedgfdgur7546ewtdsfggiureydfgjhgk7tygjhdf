@@ -4,11 +4,11 @@ import { useState } from "react";
 
 export default function Page() {
   const [brief, setBrief] = useState("");
-  const [result, setResult] = useState("");
+  const [html, setHtml] = useState("");
 
   async function generate(e) {
     e.preventDefault();
-    setResult("Generating...");
+    setHtml("<p>Generating…</p>");
 
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -17,7 +17,7 @@ export default function Page() {
     });
 
     const data = await res.json();
-    setResult(data.pages[0].html);
+    setHtml(data.pages[0].html);
   }
 
   return (
@@ -37,7 +37,7 @@ export default function Page() {
 
       <div
         style={{ marginTop: 24 }}
-        dangerouslySetInnerHTML={{ __html: result }}
+        dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
   );
